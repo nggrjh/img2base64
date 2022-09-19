@@ -8,13 +8,25 @@ import (
 	"net/http"
 )
 
+func main() {
+	urls := []string{
+		"http://i.imgur.com/m1UIjW1.jpg",
+	}
+
+	for _, url := range urls {
+		encoded := encode(url)
+
+		// Print the full base64 representation of the image
+		fmt.Println(encoded)
+	}
+
+}
+
 func toBase64(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
 
-func main() {
-	url := "http://i.imgur.com/m1UIjW1.jpg"
-
+func encode(url string) string {
 	// Fetch image from URL
 	response, err := http.Get(url)
 	if err != nil {
@@ -44,7 +56,5 @@ func main() {
 
 	// Append the base64 encoded output
 	base64Encoding += toBase64(bytes)
-
-	// Print the full base64 representation of the image
-	fmt.Println(base64Encoding)
+	return base64Encoding
 }
