@@ -8,9 +8,15 @@ import (
 	"os"
 )
 
+const file = "base64.out"
+
 func main() {
 	urls := []string{
-		"http://i.imgur.com/m1UIjW1.jpg",
+		"https://tekno.esportsku.com/wp-content/uploads/2020/10/Cara-Membuat-KTP-Kucing.jpg",
+	}
+
+	if err := os.Remove(file); err != nil {
+		log.Fatal(err)
 	}
 
 	for _, url := range urls {
@@ -20,10 +26,6 @@ func main() {
 		write(encoded)
 	}
 
-}
-
-func toBase64(b []byte) string {
-	return base64.StdEncoding.EncodeToString(b)
 }
 
 func encode(url string) string {
@@ -55,12 +57,12 @@ func encode(url string) string {
 	}
 
 	// Append the base64 encoded output
-	base64Encoding += toBase64(bytes)
+	base64Encoding += base64.StdEncoding.EncodeToString(bytes)
 	return base64Encoding
 }
 
 func write(s string) {
-	f, err := os.OpenFile("base64.out", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
