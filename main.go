@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -16,8 +16,8 @@ func main() {
 	for _, url := range urls {
 		encoded := encode(url)
 
-		// Print the full base64 representation of the image
-		fmt.Println(encoded)
+		// Write the full base64 representation of the image
+		write(encoded)
 	}
 
 }
@@ -57,4 +57,16 @@ func encode(url string) string {
 	// Append the base64 encoded output
 	base64Encoding += toBase64(bytes)
 	return base64Encoding
+}
+
+func write(s string) {
+	f, err := os.OpenFile("base64.out", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() { _ = f.Close() }()
+
+	if _, err := f.WriteString(s + "\n"); err != nil {
+		log.Fatal(err)
+	}
 }
