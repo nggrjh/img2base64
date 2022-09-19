@@ -2,25 +2,41 @@ package main
 
 import (
 	"encoding/base64"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/nggrjh/img2base64/helper"
 )
 
-const file = "base64.out"
+const (
+	file = "base64.out"
+
+	typeUrl  = "url"
+	typeFile = "file"
+)
+
+type obj struct {
+	typ  string
+	path string
+}
+
+var fn = map[string]func(string) []byte{
+	typeUrl:  helper.FetchImage,
+	typeFile: helper.ReadImage,
+}
 
 func main() {
-	urls := []string{
-		"https://tekno.esportsku.com/wp-content/uploads/2020/10/Cara-Membuat-KTP-Kucing.jpg",
+	objs := []obj{
+		{typ: typeUrl, path: "https:tekno.esportsku.com/wp-content/uploads/2020/10/Cara-Membuat-KTP-Kucing.jpg"},
 	}
 
-	if err := os.Remove(file); err != nil {
+	if err := os.RemoveAll(file); err != nil {
 		log.Fatal(err)
 	}
 
-	for _, url := range urls {
-		encoded := encode(url)
+	for _, o := range objs {
+		encoded := encodeUrl(o.path, fn[o.typ])
 
 		// Write the full base64 representation of the image
 		write(encoded)
@@ -28,25 +44,14 @@ func main() {
 
 }
 
-func encode(url string) string {
-	// Fetch image from URL
-	response, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() { _ = response.Body.Close() }()
-
-	// Read the entire file into a byte slice
-	bytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var base64Encoding string
+func encodeUrl(s string, fn func(string) []byte) string {
+	// Convert image to bytes
+	bytes := fn(s)
 
 	// Determine the content type of the image file
 	mimeType := http.DetectContentType(bytes)
 
+	var base64Encoding string
 	// Prepend the appropriate URI scheme header depending
 	// on the MIME type
 	switch mimeType {
@@ -66,7 +71,6 @@ func write(s string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() { _ = f.Close() }()
 
 	if _, err := f.WriteString(s + "\n"); err != nil {
 		log.Fatal(err)
