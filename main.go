@@ -14,6 +14,8 @@ const (
 
 	typeUrl  = "url"
 	typeFile = "file"
+
+	prefixFlag = false
 )
 
 type obj struct {
@@ -52,13 +54,16 @@ func encodeUrl(s string, fn func(string) []byte) string {
 	mimeType := http.DetectContentType(bytes)
 
 	var base64Encoding string
-	// Prepend the appropriate URI scheme header depending
-	// on the MIME type
-	switch mimeType {
-	case "image/jpeg":
-		base64Encoding += "data:image/jpeg;base64,"
-	case "image/png":
-		base64Encoding += "data:image/png;base64,"
+
+	if prefixFlag {
+		// Prepend the appropriate URI scheme header depending
+		// on the MIME type
+		switch mimeType {
+		case "image/jpeg":
+			base64Encoding += "data:image/jpeg;base64,"
+		case "image/png":
+			base64Encoding += "data:image/png;base64,"
+		}
 	}
 
 	// Append the base64 encoded output
