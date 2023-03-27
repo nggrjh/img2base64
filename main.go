@@ -2,15 +2,18 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/nggrjh/img2base64/helper"
 )
 
 const (
-	file = "base64.out"
+	fileIn = "in/%s"
+	file   = "out/%s.out"
 
 	typeUrl  = "url"
 	typeFile = "file"
@@ -30,7 +33,8 @@ var fn = map[string]func(string) []byte{
 
 func main() {
 	objs := []obj{
-		{typ: typeUrl, path: "https:tekno.esportsku.com/wp-content/uploads/2020/10/Cara-Membuat-KTP-Kucing.jpg"},
+		{typ: typeFile, path: "ktp_ariel.png"},
+		{typ: typeFile, path: "selfie_ariel.png"},
 	}
 
 	if err := os.RemoveAll(file); err != nil {
@@ -38,17 +42,18 @@ func main() {
 	}
 
 	for _, o := range objs {
-		encoded := encodeUrl(o.path, fn[o.typ])
+		encoded := encodeUrl(fmt.Sprintf(fileIn, o.path), fn[o.typ])
 
+		path := fmt.Sprintf(file, strings.Split(o.path, ".")[0])
 		// Write the full base64 representation of the image
-		write(encoded)
+		write(path, encoded)
 	}
 
 }
 
-func encodeUrl(s string, fn func(string) []byte) string {
+func encodeUrl(path string, fn func(string) []byte) string {
 	// Convert image to bytes
-	bytes := fn(s)
+	bytes := fn(path)
 
 	// Determine the content type of the image file
 	mimeType := http.DetectContentType(bytes)
@@ -71,13 +76,13 @@ func encodeUrl(s string, fn func(string) []byte) string {
 	return base64Encoding
 }
 
-func write(s string) {
-	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+func write(path, text string) {
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if _, err := f.WriteString(s + "\n"); err != nil {
+	if _, err := f.WriteString(text + "\n"); err != nil {
 		log.Fatal(err)
 	}
 }
