@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	fileIn = "in/%s"
-	file   = "out/%s.out"
+	fileIn  = "in/%s"
+	fileOut = "out/%s.out"
 
 	typeUrl  = "url"
 	typeFile = "file"
@@ -34,17 +34,22 @@ var fn = map[string]func(string) []byte{
 func main() {
 	objs := []obj{
 		{typ: typeFile, path: "ktp_ariel.png"},
+		{typ: typeFile, path: "ktp_ivan.png"},
+		{typ: typeFile, path: "ktp_mira.png"},
+		{typ: typeFile, path: "ktp_bintik.png"},
 		{typ: typeFile, path: "selfie_ariel.png"},
+		{typ: typeFile, path: "selfie_tirto.png"},
+		{typ: typeFile, path: "IMG_4885.PNG"},
 	}
 
-	if err := os.RemoveAll(file); err != nil {
+	if err := os.RemoveAll(fileOut); err != nil {
 		log.Fatal(err)
 	}
 
 	for _, o := range objs {
 		encoded := encodeUrl(fmt.Sprintf(fileIn, o.path), fn[o.typ])
 
-		path := fmt.Sprintf(file, strings.Split(o.path, ".")[0])
+		path := fmt.Sprintf(fileOut, strings.Split(o.path, ".")[0])
 		// Write the full base64 representation of the image
 		write(path, encoded)
 	}
@@ -77,7 +82,7 @@ func encodeUrl(path string, fn func(string) []byte) string {
 }
 
 func write(path, text string) {
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
